@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102542">
+<meta name="description" content="Smart Calc Version 2: calculators for everyday mathematics, business, loans, discounts and international currency conversion.">
+<title>Smart Calc Version 2</title>
+
+<style>
+:root {
+  --navy: #102542;
+  --green: #087f5b;
+  --bg: #f3f6fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #68758a;
+  --border: #dce3ed;
+  --danger: #c62828;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+header {
+  background: var(--navy);
+  color: white;
+  padding: 23px 16px;
+}
+.header-inner, main, footer {
+  width: min(100% - 28px, 1000px);
+  margin: auto;
+}
+.brand { font-size: 24px; font-weight: 800; }
+.tagline { color: #dce8f7; font-size: 14px; margin-top: 3px; }
+nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 14px 0 2px;
+}
+nav a {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: white;
+  background: #ffffff18;
+  border: 1px solid #ffffff35;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+main { padding: 20px 0 36px; }
+.intro { margin-bottom: 20px; }
+h1 { font-size: 25px; margin: 0 0 5px; }
+h2 { font-size: 20px; margin: 0 0 15px; }
+h3 { font-size: 16px; margin: 18px 0 8px; }
+p { margin-top: 5px; }
+.muted { color: var(--muted); font-size: 13px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 19px;
+  min-width: 0;
+  box-shadow: 0 4px 14px #10254208;
+}
+.wide { grid-column: 1 / -1; }
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 12px 0 5px;
+}
+input, select {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  min-height: 45px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+  color: #172033;
+  font: inherit;
+  font-size: 16px;
+}
+input:focus, select:focus {
+  outline: 2px solid #087f5b55;
+  border-color: var(--green);
+}
+button {
+  border: 0;
+  border-radius: 9px;
+  min-height: 43px;
+  padding: 11px 15px;
+  background: var(--green);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+button.secondary { background: #e8eef6; color: var(--navy); }
+button.danger { background: #fff0f0; color: var(--danger); }
+button:focus-visible, a:focus-visible {
+  outline: 3px solid #f2b84b;
+  outline-offset: 2px;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.result {
+  margin-top: 14px;
+  background: #eaf7f1;
+  border: 1px solid #c5e8d7;
+  border-radius: 10px;
+  padding: 13px;
+  overflow-wrap: anywhere;
+}
+.result strong { font-size: 20px; color: #075b43; }
+.status { font-size: 13px; margin-top: 10px; overflow-wrap: anywhere; }
+.error { color: var(--danger); }
+.success { color: #087f5b; }
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+.swap { margin-bottom: 1px; padding: 10px; }
+.calc-display {
+  width: 100%;
+  background: #edf2f8;
+  border-radius: 10px;
+  padding: 17px 12px;
+  text-align: right;
+  font-size: 27px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  min-height: 66px;
+  margin-bottom: 12px;
+}
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.keypad button { min-height: 48px; font-size: 17px; }
+.history-list { padding-left: 20px; overflow-wrap: anywhere; }
+footer {
+  padding: 20px 0 30px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+.hidden { display: none; }
+@media (max-width: 620px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .wide { grid-column: auto; }
+  .row { gap: 6px; }
+  .card { padding: 15px; }
+  h1 { font-size: 22px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">🧮 Smart Calc <span style="color:#70e0b2">V2</span></div>
+    <div class="tagline">Smart calculations for everyday life and business.</div>
+    <nav aria-label="Calculator navigation">
+      <a href="#basic">Basic</a>
+      <a href="#currency">Currency</a>
+      <a href="#percentage">Percentage</a>
+      <a href="#profit">Profit & Loss</a>
+      <a href="#discount">Discount</a>
+      <a href="#loan">Loan</a>
+      <a href="#history">History</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="intro">
+    <h1>Your all-in-one calculator</h1>
+    <p class="muted">Calculate, compare prices, estimate loan payments and convert supported world currencies.</p>
+  </section>
+
+  <div class="grid">
+
+    <section class="card" id="basic">
+      <h2>🔢 Basic Calculator</h2>
+      <div id="display" class="calc-display" aria-live="polite">0</div>
+      <div class="keypad" id="keypad">
+        <button class="secondary" data-key="C">C</button>
+        <button class="secondary" data-key="DEL">DEL</button>
+        <button class="secondary" data-key="%">%</button>
+        <button data-key="/">÷</button>
+        <button data-key="7">7</button>
+        <button data-key="8">8</button>
+        <button data-key="9">9</button>
+        <button data-key="*">×</button>
+        <button data-key="4">4</button>
+        <button data-key="5">5</button>
+        <button data-key="6">6</button>
+        <button data-key="-">−</button>
+        <button data-key="1">1</button>
+        <button data-key="2">2</button>
+        <button data-key="3">3</button>
+        <button data-key="+">+</button>
+        <button data-key="(">(</button>
+        <button data-key="0">0</button>
+        <button data-key=".">.</button>
+        <button data-key=")">)</button>
+        <button data-key="sign">+/−</button>
+        <button data-key="=" style="grid-column:span 3">=</button>
+      </div>
+      <p class="muted">You can also type a mathematical expression using your device keyboard.</p>
+      <div id="basicStatus" class="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="currency">
+      <h2>🌍 International Currency Converter</h2>
+      <p class="muted">Choose any supported currency. Exchange rates come from an online reference-rate service.</p>
+
+      <label for="amount">Amount to convert</label>
+      <input id="amount" type="number" min="0" step="any" value="1000" inputmode="decimal">
+
+      <div class="row">
+        <div>
+          <label for="fromCurrency">From currency</label>
+          <select id="fromCurrency">
+            <option value="NGN">NGN — Nigerian Naira</option>
+            <option value="USD">USD — US Dollar</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="EUR">EUR — Euro</option>
+          </select>
+        </div>
+        <button class="secondary swap" id="swap" type="button" aria-label="Swap currencies">⇄</button>
+        <div>
+          <label for="toCurrency">To currency</label>
+          <select id="toCurrency">
+            <option value="USD">USD — US Dollar</option>
+            <option value="NGN">NGN — Nigerian Naira</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="EUR">EUR — Euro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="convert" type="button">Convert</button>
+        <button id="refreshCurrencies" class="secondary" type="button">Refresh rates</button>
+      </div>
+      <div class="result" aria-live="polite">
+        <div id="currencyResult">Enter an amount and select currencies.</div>
+        <div id="rateResult" class="muted"></div>
+      </div>
+      <div id="currencyStatus" class="status" aria-live="polite">Currency rates have not been loaded yet.</div>
+      <p class="muted">Rates are indicative reference rates, not guaranteed bank, cash-exchange or remittance prices. Some currencies may be unavailable from the data provider.</p>
+    </section>
+
+    <section class="card" id="percentage">
+      <h2>％ Percentage Calculator</h2>
+      <label for="pct">Percentage (%)</label>
+      <input id="pct" type="number" step="any" placeholder="e.g. 15">
+      <label for="pctBase">Number</label>
+      <input id="pctBase" type="number" step="any" placeholder="e.g. 2000">
+      <div class="actions">
+        <button id="pctCalculate" type="button">Calculate % of number</button>
+        <button class="secondary" id="pctReset" type="button">Reset</button>
+      </div>
+      <div id="pctResult" class="result hidden" aria-live="polite"></div>
+
+      <h3>What percentage is A of B?</h3>
+      <label for="pctA">Value A</label>
+      <input id="pctA" type="number" step="any">
+      <label for="pctB">Value B</label>
+      <input id="pctB" type="number" step="any">
+      <button id="pctOf" type="button" style="margin-top:12px">Calculate percentage</button>
+      <div id="pctOfResult" class="result hidden" aria-live="polite"></div>
+
+      <h3>Percentage change</h3>
+      <label for="oldValue">Original value</label>
+      <input id="oldValue" type="number" step="any">
+      <label for="newValue">New value</label>
+      <input id="newValue" type="number" step="any">
+      <button id="pctChange" type="button" style="margin-top:12px">Calculate change</button>
+      <div id="pctChangeResult" class="result hidden" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="profit">
+      <h2>📈 Profit & Loss Calculator</h2>
+      <label for="cost">Cost price</label>
+      <input id="cost" type="number" min="0" step="any" placeholder="Purchase cost">
+      <label for="selling">Selling price</label>
+      <input id="selling" type="number" min="0" step="any" placeholder="Sale price">
+      <div class="actions">
+        <button id="profitCalculate" type="button">Calculate</button>
+        <button class="secondary" id="profitReset" type="button">Reset</button>
+      </div>
+      <div id="profitResult" class="result hidden" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="discount">
+      <h2>🏷️ Discount Calculator</h2>
+      <label for="originalPrice">Original price</label>
+      <input id="originalPrice" type="number" min="0" step="any" placeholder="Original amount">
+      <label for="discountPercent">Discount (%)</label>
+      <input id="discountPercent" type="number" min="0" max="100" step="any" placeholder="e.g. 20">
+      <div class="actions">
+        <button id="discountCalculate" type="button">Calculate</button>
+        <button class="secondary" id="discountReset" type="button">Reset</button>
+      </div>
+      <div id="discountResult" class="result hidden" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="loan">
+      <h2>🏦 Loan Calculator</h2>
+      <label for="loanAmount">Loan amount</label>
+      <input id="loanAmount" type="number" min="0" step="any" placeholder="Amount borrowed">
+      <label for="interestRate">Annual interest rate (%)</label>
+      <input id="interestRate" type="number" min="0" step="any" placeholder="e.g. 12">
+      <label for="loanDuration">Loan duration</label>
+      <div class="row" style="grid-template-columns:minmax(0,1fr) minmax(100px,0.7fr)">
+        <input id="loanDuration" type="number" min="1" step="1" placeholder="Duration">
+        <select id="loanUnit" aria-label="Loan duration unit">
+          <option value="months">Months</option>
+          <option value="years">Years</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button id="loanCalculate" type="button">Calculate repayment</button>
+        <button class="secondary" id="loanReset" type="button">Reset</button>
+      </div>
+      <div id="loanResult" class="result hidden" aria-live="polite"></div>
+      <p class="muted">Estimate only. Actual lenders may add fees, insurance or other charges.</p>
+    </section>
+
+    <section class="card wide" id="history">
+      <h2>🕘 Calculation History</h2>
+      <p class="muted">History stays in this page while it is open. It is not uploaded to a server.</p>
+      <ol id="historyList" class="history-list"><li>No calculations yet.</li></ol>
+      <button class="danger" id="clearHistory" type="button">Clear history</button>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <strong>Smart Calc Version 2</strong>
+  <p>For educational and estimation purposes. Currency reference rates can differ from actual transaction rates. Loan results are estimates, not financial advice.</p>
+</footer>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const historyItems = [];
+const numberFormat = new Intl.NumberFormat("en", {
+  maximumFractionDigits: 8
+});
+const moneyFormat = (n, code) => {
+  try {
+    return new Intl.NumberFormat("en", {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: 4
+    }).format(n);
+  } catch {
+    return numberFormat.format(n) + " " + code;
+  }
+};
+const num = id => {
+  const value = $(id).value.trim();
+  if (value === "") throw new Error("Please fill in all required fields.");
+  const n = Number(value);
+  if (!Number.isFinite(n)) throw new Error("Enter a valid number.");
+  return n;
+};
+const show = (id, html, error = false) => {
+  const el = $(id);
+  el.classList.remove("hidden");
+  el.innerHTML = html;
+  if (error) el.classList.add("error");
+  else el.classList.remove("error");
+};
+function record(text) {
+  historyItems.unshift(text);
+  if (historyItems.length > 30) historyItems.pop();
+  const list = $("historyList");
+  list.replaceChildren();
+  historyItems.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+}
+function safeRun(resultId, fn) {
+  try {
+    fn();
+  } catch (e) {
+    show(resultId, e.message || "Unable to calculate.", true);
+  }
+}
+
+// BASIC CALCULATOR
+let expression = "";
+let justCalculated = false;
+const display = $("display");
+function updateDisplay() {
+  display.textContent = expression || "0";
+}
+function calculateExpression() {
+  if (!expression.trim()) return;
+  if (!/^[0-9+\-*/().%\s]+$/.test(expression)) {
+    throw new Error("Invalid expression.");
+  }
+  // Convert percentages to decimal fractions.
+  const normalized = expression.replace(/(\d+(?:\.\d+)?)%/g, "($1/100)");
+  // Permit only mathematical characters; no identifiers or function calls.
+  const result = Function('"use strict"; return (' + normalized + ')')();
+  if (typeof result !== "number" || !Number.isFinite(result)) {
+    throw new Error("Cannot calculate this expression.");
+  }
+  const before = expression;
+  expression = String(Number(result.toPrecision(12)));
+  updateDisplay();
+  record(before + " = " + expression);
+  $("basicStatus").textContent = "Result: " + expression;
+}
+function basicKey(key) {
+  try {
+    if (key === "C") {
+      expression = "";
+      $("basicStatus").textContent = "";
+    } else if (key === "DEL") {
+      expression = expression.slice(0, -1);
+    } else if (key === "=") {
+      calculateExpression();
+      justCalculated = true;
+      return;
+    } else if (key === "sign") {
+      if (!expression) expression = "-";
+      else if (/^-?\d*\.?\d+$/.test(expression)) {
+        expression = String(-Number(expression));
+      } else {
+        expression = "-(" + expression + ")";
+      }
+    } else {
+      if (justCalculated && /[0-9.(]/.test(key)) expression = "";
+      if (expression.length >= 120) return;
+      expression += key;
+    }
+    justCalculated = false;
+    updateDisplay();
+  } catch (e) {
+    $("basicStatus").textContent = e.message;
+    $("basicStatus").className = "status error";
+  }
+}
+$("keypad").addEventListener("click", e => {
+  const button = e.target.closest("button[data-key]");
+  if (button) basicKey(button.dataset.key);
+});
+display.setAttribute("role", "textbox");
+display.setAttribute("aria-label", "Calculator display");
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,select,textarea")) return;
+  if (/^[0-9.+\-*/()%]$/.test(e.key)) basicKey(e.key);
+  else if (e.key === "Enter" || e.key === "=") {
+    e.preventDefault(); basicKey("=");
+  } else if (e.key === "Backspace") basicKey("DEL");
+  else if (e.key === "Escape") basicKey("C");
+});
+
+// PERCENTAGE
+$("pctCalculate").addEventListener("click", () => safeRun("pctResult", () => {
+  const p = num("pct"), b = num("pctBase");
+  const r = p / 100 * b;
+  show("pctResult", `${p}% of ${numberFormat.format(b)} = <strong>${numberFormat.format(r)}</strong>`);
+  record(`${p}% of ${b} = ${r}`);
+}));
+$("pctOf").addEventListener("click", () => safeRun("pctOfResult", () => {
+  const a = num("pctA"), b = num("pctB");
+  if (b === 0) throw new Error("The second value cannot be zero.");
+  const r = a / b * 100;
+  show("pctOfResult", `<strong>${numberFormat.format(r)}%</strong>`);
+  record(`${a} is ${r}% of ${b}`);
+}));
+$("pctChange").addEventListener("click", () => safeRun("pctChangeResult", () => {
+  const old = num("oldValue"), current = num("newValue");
+  if (old === 0) throw new Error("Original value cannot be zero for percentage change.");
+  const change = (current - old) / Math.abs(old) * 100;
+  const label = change > 0 ? "Increase" : change < 0 ? "Decrease" : "No change";
+  show("pctChangeResult", `${label}: <strong>${numberFormat.format(Math.abs(change))}%</strong>`);
+  record(`Percentage change from ${old} to ${current}: ${change}%`);
+}));
+$("pctReset").addEventListener("click", () => {
+  ["pct","pctBase","pctA","pctB","oldValue","newValue"].forEach(id => $(id).value = "");
+  ["pctResult","pctOfResult","pctChangeResult"].forEach(id => $(id).classList.add("hidden"));
+});
+
+// PROFIT & LOSS
+$("profitCalculate").addEventListener("click", () => safeRun("profitResult", () => {
+  const cost = num("cost"), selling = num("selling");
+  if (cost < 0 || selling < 0) throw new Error("Prices cannot be negative.");
+  const difference = selling - cost;
+  const label = difference > 0 ? "Profit" : difference < 0 ? "Loss" : "Break-even";
+  const percent = cost === 0 ? null : Math.abs(difference) / cost * 100;
+  show("profitResult", `${label}: <strong>${numberFormat.format(Math.abs(difference))}</strong><br>` +
+    `Cost price: ${numberFormat.format(cost)}<br>Selling price: ${numberFormat.format(selling)}<br>` +
+    `Margin against cost: ${percent === null ? "Not defined when cost is zero" : numberFormat.format(percent) + "%"}`);
+  record(`${label}: ${difference}; cost ${cost}; sale ${selling}`);
+}));
+$("profitReset").addEventListener("click", () => {
+  $("cost").value = ""; $("selling").value = ""; $("profitResult").classList.add("hidden");
+});
+
+// DISCOUNT
+$("discountCalculate").addEventListener("click", () => safeRun("discountResult", () => {
+  const price = num("originalPrice"), pct = num("discountPercent");
+  if (price < 0 || pct < 0 || pct > 100) throw new Error("Price must be non-negative and discount must be between 0 and 100%.");
+  const savings = price * pct / 100;
+  const finalPrice = price - savings;
+  show("discountResult", `Savings: <strong>${numberFormat.format(savings)}</strong><br>Final price: <strong>${numberFormat.format(finalPrice)}</strong>`);
+  record(`Discount ${pct}% on ${price}: save ${savings}, pay ${finalPrice}`);
+}));
+$("discountReset").addEventListener("click", () => {
+  $("originalPrice").value = ""; $("discountPercent").value = "";
+  $("discountResult").classList.add("hidden");
+});
+
+// LOAN
+$("loanCalculate").addEventListener("click", () => safeRun("loanResult", () => {
+  const principal = num("loanAmount"), annual = num("interestRate"), duration = num("loanDuration");
+  if (principal <= 0 || annual < 0 || duration <= 0) throw new Error("Loan amount and duration must be positive; interest cannot be negative.");
+  const months = $("loanUnit").value === "years" ? duration * 12 : duration;
+  if (!Number.isInteger(months) || months > 1200) throw new Error("Duration must be a whole number of months, up to 1,200 months.");
+  const r = annual / 100 / 12;
+  const monthly = r === 0 ? principal / months : principal * r / (1 - Math.pow(1 + r, -months));
+  const total = monthly * months;
+  const interest = total - principal;
+  show("loanResult", `Monthly payment: <strong>${numberFormat.format(monthly)}</strong><br>Total repayment: <strong>${numberFormat.format(total)}</strong><br>Total interest: <strong>${numberFormat.format(interest)}</strong><br>Number of payments: ${months}`);
+  record(`Loan ${principal}, ${annual}% annual, ${months} months: monthly ${monthly}`);
+}));
+$("loanReset").addEventListener("click", () => {
+  ["loanAmount","interestRate","loanDuration"].forEach(id => $(id).value = "");
+  $("loanUnit").value = "months"; $("loanResult").classList.add("hidden");
+});
+
+// INTERNATIONAL CURRENCY CONVERTER
+const API = "https://api.frankfurter.dev/v2";
+const from = $("fromCurrency"), to = $("toCurrency");
+let currenciesLoaded = false;
+let lastRate = null;
+
+async function loadCurrencies() {
+  const status = $("currencyStatus");
+  status.textContent = "Loading supported currencies...";
+  try {
+    const response = await fetch(API + "/currencies");
+    if (!response.ok) throw new Error("Currency list service returned HTTP " + response.status);
+    const data = await response.json();
+    if (!Array.isArray(data) || !data.length) throw new Error("The currency list was empty.");
+
+    const supported = data.filter(c => c.iso_code && c.name);
+    const makeOptions = (select, preferred) => {
+      const previous = select.value;
+      select.replaceChildren();
+      supported.forEach(c => {
+        const option = document.createElement("option");
+        option.value = c.iso_code;
+        option.textContent = c.iso_code + " — " + c.name;
+        select.appendChild(option);
+      });
+      select.value = supported.some(c => c.iso_code === previous) ? previous :
+        (supported.some(c => c.iso_code === preferred) ? preferred : supported[0].iso_code);
+    };
+    makeOptions(from, "NGN");
+    makeOptions(to, "USD");
+    currenciesLoaded = true;
+    status.textContent = `Loaded ${supported.length} supported currencies. Fetching the selected rate when you convert.`;
+  } catch (e) {
+    status.textContent = "Could not load the full currency list. Default currencies remain available. Check your connection and try refreshing.";
+    status.className = "status error";
+  }
+}
+
+async function convertCurrency() {
+  const status = $("currencyStatus");
+  const result = $("currencyResult");
+  const rateResult = $("rateResult");
+  try {
+    const amount = num("amount");
+    if (amount < 0) throw new Error("Enter an amount of zero or more.");
+    const base = from.value, quote = to.value;
+    if (!base || !quote) throw new Error("Please select both currencies.");
+
+    status.className = "status";
+    status.textContent = "Fetching the latest available reference rate...";
+    result.textContent = "Converting...";
+    rateResult.textContent = "";
+
+    let rate = 1, date = new Date().toISOString().slice(0,10);
+    if (base !== quote) {
+      const response = await fetch(`${API}/rate/${encodeURIComponent(base)}/${encodeURIComponent(quote)}`);
+      if (!response.ok) throw new Error("No rate was returned for this currency pair. It may not be supported by this provider.");
+      const data = await response.json();
+      if (!Number.isFinite(data.rate) || data.rate <= 0) throw new Error("The provider returned an invalid exchange rate.");
+      rate = data.rate;
+      date = data.date || "date not supplied";
+    }
+    const converted = amount * rate;
+    if (!Number.isFinite(converted)) throw new Error("The converted amount is too large.");
+    lastRate = { base, quote, rate, date };
+
+    result.innerHTML = "";
+    const strong = document.createElement("strong");
+    strong.textContent = moneyFormat(converted, quote);
+    result.appendChild(strong);
+    rateResult.textContent = `1 ${base} = ${numberFormat.format(rate)} ${quote} · Rate date: ${date}`;
+    status.textContent = "Conversion successful. Rate retrieved from the online reference-rate provider.";
+    status.className = "status success";
+    record(`${amount} ${base} = ${converted} ${quote} (rate date ${date})`);
+  } catch (e) {
+    result.textContent = "Unable to complete conversion.";
+    rateResult.textContent = "";
+    status.textContent = e.message + " Please check your internet connection and try again.";
+    status.className = "status error";
+  }
+}
+$("convert").addEventListener("click", convertCurrency);
+$("refreshCurrencies").addEventListener("click", async () => {
+  await loadCurrencies();
+  await convertCurrency();
+});
+$("swap").addEventListener("click", () => {
+  const old = from.value;
+  from.value = to.value;
+  to.value = old;
+  if ($("amount").value.trim() !== "") convertCurrency();
+});
+$("amount").addEventListener("keydown", e => {
+  if (e.key === "Enter") convertCurrency();
+});
+from.addEventListener("change", () => { if ($("amount").value !== "") convertCurrency(); });
+to.addEventListener("change", () => { if ($("amount").value !== "") convertCurrency(); });
+
+// HISTORY
+$("clearHistory").addEventListener("click", () => {
+  historyItems.length = 0;
+  $("historyList").innerHTML = "<li>No calculations yet.</li>";
+});
+
+// Initialize supported currencies and show a first conversion.
+loadCurrencies().then(() => {
+  if (currenciesLoaded) convertCurrency();
+});
+</script>
+</body>
+</html>
